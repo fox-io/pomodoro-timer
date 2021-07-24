@@ -153,7 +153,6 @@ class PomodoroTimer:
             if self.stage_num in checkmark_stages:
                 check_text = check_text + self.CHECKMARK
             self.checkmark_text.config(text=check_text)
-            print(check_text)
 
             # Start next stage
             self.start_timer()
