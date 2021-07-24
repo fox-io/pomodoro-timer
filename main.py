@@ -79,7 +79,7 @@ class PomodoroTimer:
 
         # Create rep checkmarks
         self.checkmark_text = tkinter.Label(
-            text=f"{self.CHECKMARK}",
+            text="",
             fg=f"#{self.COLORS['GREEN']}",
             bg=f"#{self.COLORS['YELLOW']}",
             font=("Courier", 24, "bold")
@@ -88,40 +88,74 @@ class PomodoroTimer:
 
         self.stage_num = 0
         self.timer = None
+        self.work_stages = [0, 2, 4, 6]
+        self.short_break_stages = [1, 3, 5]
 
     def reset_timer(self):
+        # Cancel timer
         self.window.after_cancel(self.timer)
+
+        # Reset stage text
+        self.stage_text.config(text="Timer")
+
+        # Reset timer text
+        self.canvas.itemconfig(self.timer_text, text="00:00")
+
+        # Reset checkmark text
+        self.checkmark_text.config(text="")
+
+        # Reset stage tracker
         self.stage_num = 0
 
     def start_timer(self):
-        work_stages = [0, 2, 4, 6]
-        short_break_stages = [1, 3, 5]
-        if self.stage_num in work_stages:
-            self.count_down(25 * 60, "Work", self.COLORS['RED'])
-        elif self.stage_num in short_break_stages:
-            self.count_down(5 * 60, "Short Break", self.COLORS['PINK'])
+        """Determines which stage we are in.
+
+        Called at app start and when self.stage_num has changed. Calls self.count_down using the new stage
+        duration and name.
+        """
+        if self.stage_num in self.work_stages:
+            self.count_down(int(0.1 * 60), "Work ", self.COLORS['RED'])
+        elif self.stage_num in self.short_break_stages:
+            self.count_down(int(0.1 * 60), "Break", self.COLORS['PINK'])
         else:
-            self.count_down(20 * 60, "Long Break", self.COLORS['GREEN'])
+            self.count_down(int(0.1 * 60), "Break", self.COLORS['GREEN'])
 
     def count_down(self, count, stage_name, stage_color):
+        """Updates timer and label display, then handles timer continuation/expiration."""
+        # Convert timer value in seconds to mm:ss format for display
         timer_minutes = math.floor(count / 60)
         timer_seconds = count % 60
         if timer_seconds < 10:
             timer_seconds = f"0{timer_seconds}"
         timer_value = f"{timer_minutes}:{timer_seconds}"
         self.canvas.itemconfig(self.timer_text, text=timer_value)
+
+        # Set stage label to current stage name
         self.stage_text.config(text=stage_name, fg=f"#{stage_color}")
+
+        # Continue timer or handle end of stage if timer has expired.
         if count > 0:
+            # Update every 1000ms
             self.timer = self.window.after(1000, self.count_down, count - 1, stage_name, stage_color)
         else:
+            # Counter reached zero
+
+            # Increment stage number
             self.stage_num += 1
 
-            check_text = ""
-            for check in range(0, self.stage_num + 1):
+            # Once we have completed all stages, reset our timer.
+            if self.stage_num == 8:
+                self.reset_timer()
+
+            # After stages 0, 2, 4, & 6, we add a checkmark
+            checkmark_stages = [1, 3, 5, 7]
+            check_text = self.checkmark_text.cget("text")
+            if self.stage_num in checkmark_stages:
                 check_text = check_text + self.CHECKMARK
             self.checkmark_text.config(text=check_text)
             print(check_text)
 
+            # Start next stage
             self.start_timer()
 
 
