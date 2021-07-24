@@ -1,10 +1,17 @@
 """
+Pomodoro Timer
+
+GUI timer based on the Pomodoro Timer method.
+
+Goals:
 1. Decide on the task to be done.
 2. Set the timer to 25 minutes.
 3. Work on task until timer ends.
 4. Take 5 minute break.
-5. Repeat 1-4 4 times.
+5. Repeat 4 work cycles.
 6. Take 15-30 minute break.
+
+(c)2021 John Mann <github.fox-io@foxdata.io>
 """
 import tkinter
 import math
@@ -86,6 +93,7 @@ class PomodoroTimer:
         )
         self.checkmark_text.grid(row=3, column=1)
 
+        # Initialize class variables
         self.stage_num = 0
         self.timer = None
         self.work_stages = [0, 2, 4, 6]
