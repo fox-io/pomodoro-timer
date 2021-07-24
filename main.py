@@ -72,6 +72,7 @@ class PomodoroTimer:
         self.reset_button = tkinter.Button(
             text="Reset",
             fg=f"#{self.COLORS['RED']}",
+            command=self.reset_timer,
             highlightthickness=0
         )
         self.reset_button.grid(row=2, column=2)
@@ -85,29 +86,43 @@ class PomodoroTimer:
         )
         self.checkmark_text.grid(row=3, column=1)
 
+        self.stage_num = 0
+        self.timer = None
+
+    def reset_timer(self):
+        self.window.after_cancel(self.timer)
+        self.stage_num = 0
+
     def start_timer(self):
+        work_stages = [0, 2, 4, 6]
+        short_break_stages = [1, 3, 5]
+        if self.stage_num in work_stages:
+            self.count_down(25 * 60, "Work", self.COLORS['RED'])
+        elif self.stage_num in short_break_stages:
+            self.count_down(5 * 60, "Short Break", self.COLORS['PINK'])
+        else:
+            self.count_down(20 * 60, "Long Break", self.COLORS['GREEN'])
 
-        self.count_down(5 * 60)
-
-    def count_down(self, count):
-
+    def count_down(self, count, stage_name, stage_color):
         timer_minutes = math.floor(count / 60)
         timer_seconds = count % 60
+        if timer_seconds < 10:
+            timer_seconds = f"0{timer_seconds}"
         timer_value = f"{timer_minutes}:{timer_seconds}"
         self.canvas.itemconfig(self.timer_text, text=timer_value)
+        self.stage_text.config(text=stage_name, fg=f"#{stage_color}")
         if count > 0:
-            self.window.after(1000, self.count_down, count - 1)
+            self.timer = self.window.after(1000, self.count_down, count - 1, stage_name, stage_color)
         else:
-            # timer done
-            pass
+            self.stage_num += 1
 
+            check_text = ""
+            for check in range(0, self.stage_num + 1):
+                check_text = check_text + self.CHECKMARK
+            self.checkmark_text.config(text=check_text)
+            print(check_text)
 
-# def start_timer(minutes, label):
-#     seconds = minutes * 60
-#     while seconds > 0:
-#         print(f"{label} for {minutes} minutes. {seconds}")
-#         time.sleep(1)
-#         seconds -= 1
+            self.start_timer()
 
 
 def main():
@@ -116,10 +131,6 @@ def main():
 
     # Run app
     app.window.mainloop()
-    # for round_num in range(1, 4):
-    #     start_timer(25, "Work")
-    #     start_timer(5, "Break")
-    # start_timer(15, "Break")
 
 
 if __name__ == "__main__":
