@@ -6,8 +6,8 @@
 5. Repeat 1-4 4 times.
 6. Take 15-30 minute break.
 """
-import time
 import tkinter
+import math
 
 
 class PomodoroTimer:
@@ -18,6 +18,9 @@ class PomodoroTimer:
         "GREEN": "66DE93"
     }
     CHECKMARK = "✔"
+    WORK_TIME = 15
+    SHORT_BREAK = 5
+    LONG_BREAK = 20
 
     def __init__(self):
         # Create window
@@ -38,7 +41,7 @@ class PomodoroTimer:
         )
         self.tomato_image = tkinter.PhotoImage(file="./tomato.png")
         self.canvas.create_image(100, 112, image=self.tomato_image)
-        self.canvas.create_text(
+        self.timer_text = self.canvas.create_text(
             103,
             130,
             text="00:00",
@@ -60,6 +63,8 @@ class PomodoroTimer:
         self.start_button = tkinter.Button(
             text="Start",
             fg=f"#{self.COLORS['RED']}",
+            command=self.start_timer,
+            highlightthickness=0
         )
         self.start_button.grid(row=2, column=0)
 
@@ -67,6 +72,7 @@ class PomodoroTimer:
         self.reset_button = tkinter.Button(
             text="Reset",
             fg=f"#{self.COLORS['RED']}",
+            highlightthickness=0
         )
         self.reset_button.grid(row=2, column=2)
 
@@ -78,6 +84,22 @@ class PomodoroTimer:
             font=("Courier", 24, "bold")
         )
         self.checkmark_text.grid(row=3, column=1)
+
+    def start_timer(self):
+
+        self.count_down(5 * 60)
+
+    def count_down(self, count):
+
+        timer_minutes = math.floor(count / 60)
+        timer_seconds = count % 60
+        timer_value = f"{timer_minutes}:{timer_seconds}"
+        self.canvas.itemconfig(self.timer_text, text=timer_value)
+        if count > 0:
+            self.window.after(1000, self.count_down, count - 1)
+        else:
+            # timer done
+            pass
 
 
 # def start_timer(minutes, label):
